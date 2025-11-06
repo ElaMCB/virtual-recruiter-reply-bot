@@ -1,0 +1,66 @@
+# Your Professional Profile
+# This information is used to generate appropriate responses
+
+personal:
+  name: "Elena"
+  current_title: "Java Selenium Automation Architect"
+  years_experience: 10
+  location: "Remote (Preferred)"
+  available_from: "2 weeks notice"
+
+skills:
+  primary:
+    - Java
+    - Selenium
+    - Test Automation
+    - Architecture Design
+  secondary:
+    - CI/CD
+    - Jenkins
+    - Maven/Gradle
+    - TestNG/JUnit
+  
+preferences:
+  work_arrangement: "Remote preferred, hybrid acceptable"
+  salary_range:
+    minimum: 120000
+    target: 150000
+    currency: "USD"
+  benefits_important:
+    - Health insurance
+    - 401k matching
+    - Flexible hours
+    - Professional development budget
+
+job_criteria:
+  # Agent will auto-decline if these aren't met
+  must_have:
+    - title_contains: ["architect", "lead", "senior", "principal"]
+    - remote_option: true
+  
+  nice_to_have:
+    - tech_stack: ["Java", "Selenium", "Cloud"]
+    - company_size: "medium to large"
+  
+  auto_decline:
+    - salary_below: 100000
+    - keywords: ["unpaid", "commission only", "internship"]
+    - contract_length_under_months: 3
+
+communication_style:
+  tone: "professional"
+  formality: "medium"
+  response_length: "concise"
+  
+escalation:
+  # When to alert you for human intervention
+  triggers:
+    - "final offer received"
+    - "salary negotiation"
+    - "interview scheduled"
+    - "technical assessment required"
+    - "unclear requirements"
+  
+  notification_method: "email"  # or "sms", "both"
+  notification_email: "your.personal.email@gmail.com"
+
