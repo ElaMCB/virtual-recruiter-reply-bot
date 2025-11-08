@@ -86,6 +86,10 @@ class StateManager:
         """Create a new conversation state"""
         now = datetime.now()
         
+        # Ensure timestamp is serializable
+        if 'timestamp' in initial_message and isinstance(initial_message['timestamp'], datetime):
+            initial_message['timestamp'] = initial_message['timestamp'].isoformat()
+        
         state = ConversationState(
             thread_id=thread_id,
             stage="initial_contact",
@@ -146,6 +150,10 @@ class StateManager:
     
     def add_message(self, thread_id: str, message: Dict):
         """Add a message to conversation history"""
+        # Ensure timestamp is serializable
+        if 'timestamp' in message and isinstance(message['timestamp'], datetime):
+            message['timestamp'] = message['timestamp'].isoformat()
+        
         state = self.get_state(thread_id)
         
         if state:
@@ -242,12 +250,17 @@ class StateManager:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         
+        # Get timestamp and ensure it's a string
+        timestamp = message.get('timestamp', datetime.now())
+        if isinstance(timestamp, datetime):
+            timestamp = timestamp.isoformat()
+        
         cursor.execute("""
             INSERT INTO messages (thread_id, timestamp, channel, direction, content, metadata)
             VALUES (?, ?, ?, ?, ?, ?)
         """, (
             thread_id,
-            message.get('timestamp', datetime.now()),
+            timestamp,
             message.get('channel', 'unknown'),
             message.get('direction', 'incoming'),
             message.get('content', ''),
