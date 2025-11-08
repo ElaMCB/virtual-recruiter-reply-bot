@@ -169,21 +169,65 @@ class EmailAgent:
     def _is_likely_recruiter(self, email_data: Dict) -> bool:
         """Heuristic to identify recruiter emails"""
         
-        # Keywords that suggest recruiter email
-        recruiter_keywords = [
-            'recruiter', 'recruiting', 'talent', 'opportunity', 'position',
-            'job', 'hiring', 'career', 'candidate', 'interview',
-            'resume', 'cv', 'application'
-        ]
-        
+        sender = email_data.get('from', '').lower()
+        from_name = email_data.get('from_name', '').lower()
         subject = email_data.get('subject', '').lower()
         body = email_data.get('body', '').lower()
-        from_name = email_data.get('from_name', '').lower()
         
-        combined_text = f"{subject} {body} {from_name}"
+        # Exclude known non-recruiter domains (financial, marketing, etc.)
+        excluded_domains = [
+            'robinhood', 'lenscrafters', 'amazon', 'walmart', 'target',
+            'bestbuy', 'ebay', 'paypal', 'venmo', 'chase', 'bankofamerica',
+            'wellsfargo', 'citibank', 'capitalone', 'discover', 'americanexpress',
+            'netflix', 'spotify', 'hulu', 'disney', 'apple', 'google.com',
+            'facebook', 'instagram', 'twitter', 'tiktok', 'snapchat',
+            'uber', 'lyft', 'doordash', 'grubhub', 'instacart'
+        ]
         
-        # Check for recruiter keywords
-        if any(keyword in combined_text for keyword in recruiter_keywords):
+        # If from excluded domain, not a recruiter
+        if any(domain in sender for domain in excluded_domains):
+            return False
+        
+        # Job board and recruiter domains (usually legitimate)
+        recruiter_domains = [
+            'indeed', 'linkedin', 'dice', 'glassdoor', 'ziprecruiter',
+            'monster', 'careerbuilder', 'simplyhired', 'hired', 'angellist',
+            'greenhouse', 'lever', 'workday', 'taleo', 'icims',
+            'recruiting', 'talent', 'staffing', 'search', 'placement'
+        ]
+        
+        # If from known recruiter domain, likely a recruiter
+        if any(domain in sender or domain in from_name for domain in recruiter_domains):
+            # But check it's not just a generic alert
+            generic_alerts = ['job alert', 'saved search', 'recommended for you']
+            if any(alert in subject for alert in generic_alerts):
+                return False  # Generic alerts, not direct recruiter contact
+            return True
+        
+        # Keywords that strongly suggest recruiter email (require multiple matches)
+        strong_recruiter_keywords = [
+            'recruiter', 'recruiting', 'talent acquisition', 'talent partner',
+            'hr specialist', 'hiring manager', 'staffing', 'placement'
+        ]
+        
+        combined_text = f"{subject} {from_name}"
+        
+        # If sender identifies as recruiter, it's a recruiter
+        if any(keyword in combined_text for keyword in strong_recruiter_keywords):
+            return True
+        
+        # Job-specific keywords in subject (not just body)
+        job_keywords = [
+            'position with', 'role with', 'opportunity with',
+            'interview', 'job description', 'job opening',
+            'we have an opening', 'reaching out to you for',
+            'job title:', 'location:', 'pay:', 'salary:'
+        ]
+        
+        # Check for job-specific language in subject
+        subject_matches = sum(1 for keyword in job_keywords if keyword in subject)
+        
+        if subject_matches >= 2:  # Need at least 2 job keywords in subject
             return True
         
         return False
