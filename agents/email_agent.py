@@ -198,11 +198,27 @@ class EmailAgent:
         
         # If from known recruiter domain, likely a recruiter
         if any(domain in sender or domain in from_name for domain in recruiter_domains):
-            # But check it's not just a generic alert
-            generic_alerts = ['job alert', 'saved search', 'recommended for you']
-            if any(alert in subject for alert in generic_alerts):
-                return False  # Generic alerts, not direct recruiter contact
-            return True
+            # Check if it's a specific job vs generic alert
+            # Specific jobs mention company names and specific roles
+            has_company_name = any(company in subject for company in [
+                ' at ', ' with ', ' - ', 'company', 'corporation', 'group', 
+                'systems', 'solutions', 'technologies', 'services', 'inc'
+            ])
+            
+            # If subject has a company/role mentioned, it's specific enough
+            if has_company_name:
+                return True
+            
+            # Filter truly generic alerts
+            very_generic = [
+                'job alert for:', 'saved search:', 'your daily job', 
+                'jobs you might like', 'based on your resume'
+            ]
+            
+            if any(alert in subject for alert in very_generic):
+                return False  # Too generic
+            
+            return True  # From recruiter domain, specific enough
         
         # Keywords that strongly suggest recruiter email (require multiple matches)
         strong_recruiter_keywords = [
