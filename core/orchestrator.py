@@ -86,11 +86,16 @@ class JobApplicationOrchestrator:
         processed = 0
         
         for email in emails:
+            email_id = email.get('id')
+            thread_id = email.get('thread_id')
+            
             try:
                 print(f"\nProcessing email from {email.get('from_name')}: {email.get('subject')}")
                 
+                # Label email immediately so we know ARIA analyzed it
+                self.email_agent.add_label(email_id, 'AI-Recruiter/Processed')
+                
                 # Get or create conversation state
-                thread_id = email.get('thread_id')
                 state = self.state_manager.get_state(thread_id)
                 
                 if not state:
